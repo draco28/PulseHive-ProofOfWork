@@ -1,0 +1,49 @@
+---
+name: {{SKILL_NAME}}
+description: >
+  {{WHAT_IT_DOES}}.
+  Use when {{WHEN_TO_TRIGGER}}.
+  Invoke: /{{SKILL_NAME}} [arguments].
+allowed-tools: Read, Glob, Grep, Bash
+user-invocable: true
+---
+
+# {{SKILL_NAME}}
+
+<!-- Brief description of what this skill does. -->
+
+---
+
+## Activation
+
+```
+/{{SKILL_NAME}} [argument]
+```
+
+- With argument: <what happens>
+- Without: <default behavior>
+
+---
+
+## Workflow
+
+### Step 1: <First Step>
+
+<!-- Describe the first step -->
+
+### Step 2: <Second Step>
+
+<!-- Describe the second step -->
+
+---
+
+## Related Skills
+
+- [testing-protocol](../testing-protocol/SKILL.md) — Test quality standards
+- [feature-development](../feature-development/SKILL.md) — Feature workflow
+
+---
+
+## User Argument
+
+$ARGUMENTS — {{ARGUMENT_DESCRIPTION}}

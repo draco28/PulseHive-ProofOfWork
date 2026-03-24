@@ -1,0 +1,96 @@
+# {{PROJECT_NAME}} — Claude Code Context
+
+> **Project**: {{PROJECT_NAME}} — {{ONE_LINE_DESCRIPTION}}
+> **Version**: {{VERSION}}
+> **Status**: {{STATUS}}
+
+## Overview
+
+<!-- What the project IS, what it's NOT, and who it's for.
+     2-3 paragraphs. Be specific about the problem domain. -->
+
+## Architecture
+
+<!-- Key components, boundaries, and relationships.
+     Include a diagram or table mapping components to responsibilities.
+     Mention external dependencies and how they integrate. -->
+
+## Tech Stack
+
+<!-- Language, framework, key dependencies, and versions.
+     Example:
+     - **Language**: Rust
+     - **Async**: Tokio
+     - **Database**: PostgreSQL via sqlx
+     - **Testing**: cargo test, proptest, cargo-fuzz -->
+
+## Project Structure
+
+<!-- Directory tree with annotations.
+     Example:
+     ```
+     src/
+     ├── lib.rs           # Module exports + prelude
+     ├── api/             # HTTP handlers
+     ├── domain/          # Business logic
+     ├── storage/         # Database layer
+     └── config.rs        # Configuration
+     ``` -->
+
+## Development Commands
+
+```bash
+# Build
+# <your build command>
+
+# Test
+# <your test command>
+
+# Lint
+# <your lint command>
+
+# Format
+# <your format command>
+
+# Benchmarks (if applicable)
+# <your benchmark command>
+```
+
+## Code Conventions
+
+<!-- Style rules, patterns, and anti-patterns specific to this project.
+     Examples:
+     - Use thiserror for error derivation
+     - Never panic in library code — always return Result
+     - Document all public APIs with examples
+     - Use enums over strings for type safety -->
+
+## Performance Targets
+
+<!-- Optional. Key operation latency budgets if applicable.
+     | Operation | Target |
+     |-----------|--------|
+     | API response | < 100ms |
+     | Search query | < 50ms | -->
+
+## Key Documents
+
+<!-- Important files and their purposes.
+     | Document | Purpose |
+     |----------|---------|
+     | SPEC.md | Full specification |
+     | docs/api.md | API reference | -->
+
+## Related Repos
+
+<!-- Sibling projects, upstream/downstream dependencies.
+     | Repo | Purpose |
+     |------|---------|
+     | /path/to/repo | Description | -->
+
+## Resources
+
+<!-- ProjectPulse ID (if applicable), external links, dashboards.
+     - **ProjectPulse ID**: <number>
+     - **Dashboard**: <url>
+     - **CI**: <url> -->
