@@ -1,0 +1,108 @@
+# {{PROJECT_NAME}} — AI Agent Workflow Guide
+
+**Project ID**: {{PROJECTPULSE_ID}}
+**MCP Server**: https://projectpulsemcp.dracodev.dev/mcp
+**Dashboard**: https://projectpulse.dracodev.dev/
+
+---
+
+## Quick Start
+
+Load the project context:
+
+```javascript
+projectpulse_context_load({ projectId: {{PROJECTPULSE_ID}} });
+```
+
+---
+
+## Daily Workflow
+
+### 1. Load Context (Crucial)
+
+Start every session by loading the project context from ProjectPulse:
+
+```javascript
+projectpulse_context_load({ projectId: {{PROJECTPULSE_ID}} });
+```
+
+This loads the project brief, tech stack, and active tasks into memory.
+
+### 2. Manage Tasks
+
+Use the ProjectPulse ticket system to track work:
+
+```javascript
+// Find your tickets
+projectpulse_ticket_search({ sprintNumber: 1, status: ['todo'] });
+
+// Start a session for a ticket
+projectpulse_agent_session_start({
+  projectId: {{PROJECTPULSE_ID}},
+  name: 'Implement Feature X',
+  activeTicketIds: [123],
+});
+```
+
+---
+
+## Skills
+
+Reusable patterns and procedures are available via skills.
+
+### Workflow Skills
+
+| Skill | Description |
+|-------|-------------|
+| `code-review` | Review tickets/PRs against requirements, 8-point gap analysis |
+| `pair-programming` | Guided learning sessions with ticket integration (`/pair <ticket>`) |
+| `feature-development` | Feature development SOP, branch workflow, quality checks |
+| `testing-protocol` | Test tier strategy, coverage requirements, anti-patterns |
+| `release-process` | Versioning, changelog, registry publishing, rollback |
+| `skill-creator` | Guide for creating new skills |
+
+### Project-Specific Skills
+
+<!-- Add project-specific skills here as you create them -->
+
+---
+
+## ProjectPulse MCP Tools
+
+| Category | Tools |
+|----------|-------|
+| **Context** | `projectpulse_context_load`, `projectpulse_context_lookup` |
+| **Knowledge** | `projectpulse_knowledge_search`, `projectpulse_knowledge_get` |
+| **Wiki** | `projectpulse_wiki_search`, `projectpulse_wiki_get`, `projectpulse_wiki_update` |
+| **Roadmap** | `projectpulse_sprint_getCurrentPosition`, `projectpulse_sprint_queryHierarchy` |
+| **Kanban** | `projectpulse_kanban_getBoard`, `projectpulse_kanban_moveTicket` |
+| **Tickets** | `projectpulse_ticket_get`, `projectpulse_ticket_search`, `projectpulse_ticket_addComment` |
+| **Sessions** | `projectpulse_agent_session_start`, `projectpulse_agent_session_update`, `projectpulse_agent_session_end` |
+
+---
+
+## Code Review Workflow
+
+```bash
+/code-review [ticket-number]
+```
+
+Reviews all tickets in "in-review" status or a specific ticket.
+
+---
+
+## Pair Programming
+
+```bash
+/pair 5        # Work on ticket #5
+```
+
+Learning modes: Guided, Collaborative, Exploratory, Watch & Learn.
+
+---
+
+## Token Efficiency
+
+1. **Load Context First**: Use `projectpulse_context_load`.
+2. **Load Skills On-Demand**: Don't load all skills — ask for specific ones.
+3. **Use CLAUDE.md**: Keep project context in CLAUDE.md so it's always available.

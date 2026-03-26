@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (OpenCode)
+node_modules/
+bun.lock
+
+# Test output
+/tmp-test-*
+
+# Secrets — NEVER commit
+*.secret
+*.key
+*.pem
+.env
+.env.*
