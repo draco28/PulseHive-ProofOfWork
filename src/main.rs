@@ -1,5 +1,6 @@
 mod agents;
 mod approval;
+mod provider_fix;
 mod tools;
 mod workflow;
 
@@ -9,7 +10,8 @@ use colored::Colorize;
 use futures::StreamExt;
 use pulsehive::prelude::*;
 use pulsehive::{HiveMind, Task};
-use pulsehive_openai::{OpenAICompatibleProvider, OpenAIConfig};
+use provider_fix::FixedProvider;
+use pulsehive_openai::OpenAIConfig;
 use std::path::PathBuf;
 use workflow::{build_dry_run_pipeline, build_pipeline};
 
@@ -90,8 +92,8 @@ async fn main() -> anyhow::Result<()> {
         tokio::fs::create_dir_all(parent).await?;
     }
 
-    // Set up LLM provider
-    let provider = OpenAICompatibleProvider::new(
+    // Set up LLM provider (custom impl with correct tool_call wire format)
+    let provider = FixedProvider::new(
         OpenAIConfig::new(&cli.api_key, &cli.model).with_base_url(cli.base_url.clone()),
     );
 
