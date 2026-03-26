@@ -12,6 +12,17 @@ Thumbs.db
 node_modules/
 bun.lock
 
+# Rust
+/target/
+Cargo.lock
+
+# Claude scaffolding (local only)
+.claude/
+CLAUDE.md
+
+# DevStudio substrate
+.devstudio/
+
 # Test output
 /tmp-test-*
 

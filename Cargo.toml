@@ -1,0 +1,27 @@
+[package]
+name = "pulsehive-devstudio"
+version = "0.1.0"
+edition = "2021"
+description = "Multi-agent CLI code agent powered by PulseHive SDK"
+
+[[bin]]
+name = "devstudio"
+path = "src/main.rs"
+
+[dependencies]
+pulsehive = { version = "1.0", features = ["openai"] }
+pulsehive-openai = "1.0"
+async-trait = "0.1"
+clap = { version = "4", features = ["derive", "env"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "process", "io-util", "time"] }
+colored = "3"
+futures = "0.3"
+serde_json = "1"
+ignore = "0.4"
+regex = "1"
+glob = "0.3"
+thiserror = "2"
+anyhow = "1"
+
+[dev-dependencies]
+tempfile = "3"
