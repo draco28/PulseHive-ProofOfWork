@@ -514,4 +514,176 @@ The proof-of-concept is successful if:
 
 ---
 
+## 11. PulseHive SDK Quick Reference
+
+DevStudio imports `pulsehive = { version = "1.0", features = ["openai"] }`. Here are the exact types and patterns to use:
+
+### HiveMind Setup
+
+```rust
+use pulsehive::prelude::*;
+use pulsehive::{HiveMind, Task};
+use pulsehive_openai::{OpenAIConfig, OpenAICompatibleProvider};
+
+let provider = OpenAICompatibleProvider::new(
+    OpenAIConfig::new(&api_key, &model)
+        .with_base_url(&base_url)  // GLM, Ollama, etc.
+);
+
+let hive = HiveMind::builder()
+    .substrate_path(&substrate_path)
+    .llm_provider("openai", provider)
+    .approval_handler(CliApprovalHandler::new(approve_all))
+    .build()?;
+```
+
+### Agent Definition
+
+```rust
+use std::sync::Arc;
+
+let agent = AgentDefinition {
+    name: "explorer".into(),
+    kind: AgentKind::Llm(Box::new(LlmAgentConfig {
+        system_prompt: format!("You are a codebase exploration agent.\n\nTask: {task}\nRepo: {repo}"),
+        tools: vec![
+            Arc::new(FileReadTool::new(&repo)),
+            Arc::new(TreeTool::new(&repo)),
+            Arc::new(SearchTool::new(&repo)),
+        ],
+        lens: Lens::new(["code", "architecture"]),
+        llm_config: LlmConfig::new("openai", &model),
+        experience_extractor: None,  // Use default
+        refresh_every_n_tool_calls: None,
+    })),
+};
+```
+
+### Tool Implementation Pattern
+
+```rust
+use async_trait::async_trait;
+use pulsehive_core::tool::{Tool, ToolContext, ToolResult};
+use pulsehive_core::error::Result;
+use serde_json::Value;
+
+struct FileReadTool {
+    repo_root: PathBuf,
+}
+
+#[async_trait]
+impl Tool for FileReadTool {
+    fn name(&self) -> &str { "file_read" }
+    fn description(&self) -> &str { "Read file contents" }
+    fn parameters(&self) -> Value { json!({...}) }
+
+    async fn execute(&self, params: Value, _ctx: &ToolContext) -> Result<ToolResult> {
+        let path = self.repo_root.join(params["path"].as_str().unwrap_or(""));
+        // Validate path is within repo_root (security!)
+        let content = tokio::fs::read_to_string(&path).await
+            .map_err(|e| PulseHiveError::tool(format!("Cannot read {}: {e}", path.display())))?;
+        Ok(ToolResult::text(content))
+    }
+}
+```
+
+### Event Consumption
+
+```rust
+use futures::StreamExt;
+
+let mut stream = hive.deploy(vec![pipeline], vec![Task::new(&task)]).await?;
+
+while let Some(event) = stream.next().await {
+    match &event {
+        HiveEvent::AgentStarted { name, kind, .. } => {
+            eprintln!("🔄 {} started ({:?})", name, kind);
+        }
+        HiveEvent::ToolCallStarted { tool_name, .. } => {
+            eprintln!("  🔧 {}", tool_name);
+        }
+        HiveEvent::AgentCompleted { outcome, .. } => {
+            match outcome {
+                AgentOutcome::Complete { response } => eprintln!("✅ {}", &response[..80.min(response.len())]),
+                AgentOutcome::Error { error } => eprintln!("❌ {}", error),
+                AgentOutcome::MaxIterationsReached => eprintln!("⚠️ Max iterations"),
+            }
+        }
+        _ => if verbose { eprintln!("  {:?}", event); }
+    }
+    // Break when top-level pipeline completes
+    if matches!(&event, HiveEvent::AgentCompleted { .. }) {
+        // Check if this is the pipeline (not a child)
+    }
+}
+```
+
+### Approval Handler
+
+```rust
+use pulsehive_core::approval::{ApprovalHandler, ApprovalResult, PendingAction};
+use std::sync::atomic::{AtomicBool, Ordering};
+
+struct CliApprovalHandler {
+    approve_all: AtomicBool,
+}
+
+#[async_trait]
+impl ApprovalHandler for CliApprovalHandler {
+    async fn request_approval(&self, action: &PendingAction) -> ApprovalResult {
+        if self.approve_all.load(Ordering::Relaxed) {
+            return ApprovalResult::Approved;
+        }
+        eprintln!("\n📝 {} wants to: {}", action.tool_name, action.description);
+        eprint!("[y]es / [n]o / [a]pprove all: ");
+        // Read stdin...
+        ApprovalResult::Approved
+    }
+}
+```
+
+### Security: Path Validation
+
+All file tools MUST validate that paths stay within the repo root:
+
+```rust
+fn validate_path(repo_root: &Path, relative: &str) -> Result<PathBuf> {
+    let full = repo_root.join(relative).canonicalize()
+        .map_err(|e| PulseHiveError::tool(format!("Invalid path: {e}")))?;
+    if !full.starts_with(repo_root.canonicalize().unwrap()) {
+        return Err(PulseHiveError::tool("Path traversal blocked — must stay within repo"));
+    }
+    Ok(full)
+}
+```
+
+---
+
+## 12. PulseHive SDK Source Reference
+
+The SDK source is at `/Users/draco/projects/PulseHive`. Key files for DevStudio implementors:
+
+| File | What to learn |
+|------|---------------|
+| `pulsehive-runtime/examples/cli_agent.rs` | MockLlm pattern, HiveMind builder, event loop |
+| `pulsehive-runtime/examples/custom_tool.rs` | Tool trait implementation (Calculator, WordCounter, approval) |
+| `pulsehive-runtime/examples/multi_agent_workflow.rs` | Sequential/Parallel workflows |
+| `pulsehive-core/src/tool.rs` | Tool trait definition (name, description, parameters, execute, requires_approval) |
+| `pulsehive-core/src/approval.rs` | ApprovalHandler trait, PendingAction, ApprovalResult |
+| `pulsehive-core/src/agent.rs` | AgentDefinition, AgentKind, LlmAgentConfig |
+| `pulsehive-core/src/lens.rs` | Lens struct, RecencyCurve, attention_budget |
+| `pulsehive-core/src/event.rs` | HiveEvent enum (14 variants) |
+| `pulsehive-runtime/src/hivemind.rs` | HiveMind::builder(), deploy(), shutdown() |
+| `docs/getting-started.md` | Full getting-started guide with Rust examples |
+| `SPEC.md` | SDK architecture specification |
+
+### Published Crate Docs
+
+- https://docs.rs/pulsehive/1.0.1
+- https://docs.rs/pulsehive-core/1.0.1
+- https://docs.rs/pulsehive-runtime/1.0.1
+- https://docs.rs/pulsehive-openai/1.0.1
+
+---
+
 *This specification is the product definition for implementation. The PulseHive SDK (v1.0) provides all primitives needed — DevStudio only implements Tools, Agents, and the CLI wrapper.*
